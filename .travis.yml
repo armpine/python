@@ -1,0 +1,44 @@
+sudo: required
+
+services:
+- docker
+
+language: bash
+
+script:
+
+# prepare qemu
+- docker run --rm --privileged multiarch/qemu-user-static:register --reset
+
+# get qemu-arm-static binary
+- mkdir tmp
+- >
+  pushd tmp &&
+  curl -L -o qemu-arm-static.tar.gz https://github.com/multiarch/qemu-user-static/releases/download/v2.6.0/qemu-arm-static.tar.gz &&
+  tar xzf qemu-arm-static.tar.gz &&
+  popd
+
+# build image
+- docker build -t armpine/python .
+
+# test image
+- docker run armpine/home-assistant whoami
+
+# push image
+- >
+  if [ "" == "master" ]; then
+    docker login -u="$DOCKER_USER" -p="$DOCKER_PASS"
+
+    docker tag armpine/python armpine/python:latest
+    docker tag armpine/python armpine/python:3
+    docker tag armpine/python armpine/python:3.5
+    docker tag armpine/python armpine/python:3.5.2
+    docker tag armpine/python armpine/python:3.5.2-r10
+
+    docker push armpine/python:latest
+    docker push armpine/python:3
+    docker push armpine/python:3.5
+    docker push armpine/python:3.5.2
+    docker push armpine/python:3.5.2-r10
+    docker push armpine/python
+  fi
