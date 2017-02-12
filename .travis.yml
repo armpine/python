@@ -22,7 +22,7 @@ script:
 - docker build -t armpine/python .
 
 # test image
-- docker run armpine/home-assistant whoami
+- docker run armpine/python whoami
 
 # push image
 - >
